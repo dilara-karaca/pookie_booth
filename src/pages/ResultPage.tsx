@@ -108,7 +108,12 @@ export function ResultPage() {
           </StripFit>
         </motion.div>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <motion.div
+          className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          initial={reduce ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: reduce ? 0 : 0.15, duration: 0.35 }}
+        >
           <Button size="lg" variant="primary" disabled={busy !== null} onClick={() => void onDownload()}>
             <Download className="h-5 w-5" aria-hidden="true" />
             {busy === "download" ? copy.result.printing : copy.result.download}
@@ -117,7 +122,7 @@ export function ResultPage() {
             <Share2 className="h-5 w-5" aria-hidden="true" />
             {busy === "share" ? copy.result.preparing : copy.result.share}
           </Button>
-        </div>
+        </motion.div>
         {shareNote ? <p className="mx-auto mt-4 max-w-md rounded-2xl bg-white px-4 py-3">{shareNote}</p> : null}
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

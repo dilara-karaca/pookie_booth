@@ -1,4 +1,5 @@
 import { ArrowLeft, SwitchCamera } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/common/Button";
@@ -33,6 +34,7 @@ export function CameraPage() {
   const [busy, setBusy] = useState(false);
   const [holding, setHolding] = useState(false);
   const [captureCode, setCaptureCode] = useState<"not-ready" | "no-canvas" | "failed" | null>(null);
+  const reduce = useReducedMotion();
   const busyRef = useRef(false);
   const timerRef = useRef<number | null>(null);
   const { videoRef, status, error, canFlip } = useCamera(armed, facing, retryToken);
@@ -125,15 +127,25 @@ export function CameraPage() {
       </div>
 
       {!armed ? (
-        <section className="bg-skywash rounded-[2rem] border-2 border-ink px-6 py-12 text-center shadow-[8px_8px_0_#A2D2FF]">
+        <motion.section
+          className="bg-skywash rounded-[2rem] border-2 border-ink px-6 py-12 text-center shadow-[8px_8px_0_#A2D2FF]"
+          initial={reduce ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", bounce: 0.32, duration: 0.5 }}
+        >
           <p className="font-display text-4xl font-bold sm:text-5xl">{copy.camera.ready}</p>
           <p className="mx-auto mt-3 max-w-lg text-lg">{copy.camera.readyBody(getLayout(layoutId).photoCount)}</p>
           <Button size="lg" className="mt-6" onClick={() => setArmed(true)}>
             {copy.camera.open}
           </Button>
-        </section>
+        </motion.section>
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_180px]">
+        <motion.div
+          className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_180px]"
+          initial={reduce ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div>
             <div className="relative overflow-hidden rounded-[2rem] border-[3px] border-ink bg-ink shadow-[8px_8px_0_#40354B]">
               <div className="relative" style={{ aspectRatio: `${PHOTO_ASPECT}` }}>
@@ -182,7 +194,10 @@ export function CameraPage() {
               )}
               <button
                 type="button"
-                className="grid h-20 w-20 place-items-center rounded-full border-4 border-ink bg-coral shadow-[4px_4px_0_#40354B] disabled:opacity-50"
+                className={cn(
+                  "grid h-20 w-20 place-items-center rounded-full border-4 border-ink bg-coral shadow-[4px_4px_0_#40354B] active:scale-95 disabled:opacity-50",
+                  status === "ready" && !busy && "shutter-pulse",
+                )}
                 aria-label={retakeIndex !== null ? copy.camera.retake(displayIndex) : copy.camera.take(displayIndex)}
                 disabled={status !== "ready" || busy}
                 onClick={shoot}
@@ -204,7 +219,7 @@ export function CameraPage() {
               density="thumbnail"
             />
           </div>
-        </div>
+        </motion.div>
       )}
 
       <ol className="flex flex-wrap justify-center gap-2" aria-label={copy.camera.shots}>
@@ -214,6 +229,7 @@ export function CameraPage() {
             className={cn(
               "w-20 overflow-hidden rounded-2xl border-2 border-ink bg-white sm:w-24",
               photoIndex === index && "ring-4 ring-butter",
+              photo && "selected-pop",
             )}
           >
             {photo ? (

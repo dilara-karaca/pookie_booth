@@ -1,16 +1,18 @@
 import { useEffect } from "react";
-import { Outlet, useBlocker, useLocation } from "react-router-dom";
+import { useOutlet, useBlocker, useLocation } from "react-router-dom";
 import { useI18n } from "@/lib/i18n/LanguageProvider";
 import { hasAnyPhoto, useSession } from "@/store/session";
 import { ConfirmDialog } from "../common/ConfirmDialog";
+import { PageTransition } from "../common/PageTransition";
 import { StepIndicator } from "../common/StepIndicator";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 
-const flow = new Set(["/camera", "/editor", "/result"]);
+const flow = new Set(["/frames", "/camera", "/editor", "/result"]);
 
 export function RootLayout() {
   const location = useLocation();
+  const outlet = useOutlet();
   const photos = useSession((state) => state.photos);
   const resetSession = useSession((state) => state.resetSession);
   const shooting = hasAnyPhoto(photos);
@@ -34,6 +36,12 @@ export function RootLayout() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [shooting]);
 
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = decodeURIComponent(location.hash.slice(1));
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [location.pathname, location.hash]);
+
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-butter focus:px-4 focus:py-2">
@@ -44,7 +52,7 @@ export function RootLayout() {
         <StepIndicator pathname={location.pathname} />
       </div>
       <main id="main" className="flex-1">
-        <Outlet />
+        <PageTransition pathname={location.pathname}>{outlet}</PageTransition>
       </main>
       {compact ? null : <Footer />}
       <ConfirmDialog

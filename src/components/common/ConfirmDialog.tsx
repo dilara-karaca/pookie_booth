@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { useI18n } from "@/lib/i18n/LanguageProvider";
 import { Button } from "./Button";
 
@@ -24,6 +25,7 @@ export function ConfirmDialog({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const { copy } = useI18n();
   const cancelText = cancelLabel ?? copy.leave.keep;
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     if (!open) return;
@@ -38,12 +40,21 @@ export function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] grid place-items-center bg-ink/45 p-4" role="presentation">
-      <div
+    <motion.div
+      className="fixed inset-0 z-[80] grid place-items-center bg-ink/45 p-4"
+      role="presentation"
+      initial={reduce ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
         className="w-full max-w-md rounded-[2rem] border-2 border-ink bg-cream p-6 shadow-[8px_8px_0_#40354B]"
+        initial={reduce ? false : { opacity: 0, y: 18, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", bounce: 0.3, duration: 0.42 }}
       >
         <p className="font-display text-sm font-semibold uppercase tracking-wide text-coral">{copy.kicker}</p>
         <h2 id="confirm-title" className="mt-1 font-display text-3xl font-bold">
@@ -58,7 +69,7 @@ export function ConfirmDialog({
             {confirmLabel}
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

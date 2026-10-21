@@ -1,4 +1,4 @@
-import { ArrowRight, Camera, Download, Frame } from "lucide-react";
+import { Camera, Download, Frame } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import { buttonClass } from "@/components/common/Button";
@@ -9,7 +9,7 @@ import { getDemoPhoto } from "@/features/frames/utils/demoPhotos";
 import type { FrameLayout } from "@/features/frames/types";
 import { useI18n } from "@/lib/i18n/LanguageProvider";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { hasAnyPhoto, isShootComplete, useSession } from "@/store/session";
+import { hasAnyPhoto, useSession } from "@/store/session";
 
 const demoDate = "18.10.2026 · 21:53";
 
@@ -25,21 +25,21 @@ const heroStrips: Array<{
     designId: "lovely-pink-hearts",
     captionKey: "besties",
     scenes: ["blush", "sunset", "studio", "meadow"],
-    className: "relative z-10 w-[46%] -rotate-6",
+            className: "sway relative z-10 w-[46%] -rotate-6",
   },
   {
     layoutId: "vertical-3",
     designId: "retro-stars",
     captionKey: "night",
     scenes: ["night", "sky", "studio"],
-    className: "absolute top-6 right-0 z-20 w-[42%] rotate-6",
+    className: "sway sway-late absolute top-6 right-0 z-20 w-[42%] rotate-6",
   },
   {
     layoutId: "vertical-2",
     designId: "classic-butter",
     captionKey: "hello",
     scenes: ["sunset", "meadow"],
-    className: "absolute bottom-0 left-[18%] z-0 w-[34%] rotate-3",
+    className: "sway sway-later absolute bottom-0 left-[18%] z-0 w-[34%] rotate-3",
   },
 ];
 
@@ -67,14 +67,9 @@ export function HomePage() {
   usePageTitle();
   const { copy } = useI18n();
   const reduce = useReducedMotion();
-  const photos = useSession((state) => state.photos);
   const selectLayout = useSession((state) => state.selectLayout);
   const selectDesign = useSession((state) => state.selectDesign);
   const navigate = useNavigate();
-  const complete = isShootComplete(photos);
-  const started = hasAnyPhoto(photos);
-  const cta = complete ? "/result" : started ? "/camera" : "/frames";
-  const ctaLabel = complete ? copy.home.seeStrip : started ? copy.home.continueShoot : copy.home.start;
   const samples = copy.home.samples;
 
   return (
@@ -96,19 +91,15 @@ export function HomePage() {
             </div>
             <h1 className="mt-5 font-display text-6xl leading-[0.9] font-bold tracking-tight sm:text-7xl lg:text-8xl">
               {copy.home.lead}{" "}
-              <span className="inline-block -rotate-2 rounded-3xl border-2 border-ink bg-butter px-3 py-1 shadow-[6px_6px_0_#FF8FAB]">
+              <span className="wiggle inline-block -rotate-2 rounded-3xl border-2 border-ink bg-butter px-3 py-1 shadow-[6px_6px_0_#FF8FAB]">
                 {copy.home.accent}
               </span>
             </h1>
             <p className="mt-5 max-w-xl text-xl leading-snug sm:text-2xl">{copy.home.tagline}</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link to={cta} className={buttonClass("primary", "lg")}>
-                {ctaLabel}
+            <div className="mt-7">
+              <Link to="/frames" className={buttonClass("primary", "lg")}>
+                {copy.home.start}
               </Link>
-              <a href="#frames" className={buttonClass("ghost", "lg")}>
-                {copy.home.seeFrames}
-                <ArrowRight className="h-5 w-5" aria-hidden="true" />
-              </a>
             </div>
           </motion.div>
 
@@ -132,7 +123,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-12">
+      <section id="how-it-works" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-12">
         <h2 className="font-display text-4xl font-bold sm:text-5xl">
           {copy.home.howLead} <span className="text-coral">{copy.home.howAccent}</span>
         </h2>
@@ -141,7 +132,14 @@ export function HomePage() {
             const style = stepStyles[index];
             const Icon = style.icon;
             return (
-            <article key={step.title} className={`rounded-[2rem] border-2 border-ink p-6 shadow-[6px_6px_0_#40354B] ${style.className}`}>
+            <motion.article
+              key={step.title}
+              className={`rounded-[2rem] border-2 border-ink p-6 shadow-[6px_6px_0_#40354B] ${style.className}`}
+              initial={reduce ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            >
               <div className="flex items-center justify-between">
                 <span className="grid h-12 w-12 place-items-center rounded-2xl border-2 border-ink bg-white font-display text-xl font-bold">
                   {index + 1}
@@ -150,25 +148,26 @@ export function HomePage() {
               </div>
               <h3 className="mt-5 font-display text-3xl font-bold">{step.title}</h3>
               <p className="mt-2 text-lg leading-snug">{step.copy}</p>
-            </article>
+            </motion.article>
             );
           })}
         </div>
       </section>
 
-      <section id="frames" className="bg-skywash mx-auto max-w-6xl px-4 py-12">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-display text-4xl font-bold sm:text-5xl">{copy.home.showcase}</h2>
-          <Link to="/frames" className={buttonClass("sunny", "md")}>
-            {copy.home.browse}
-          </Link>
-        </div>
+      <section id="frames" className="bg-skywash mx-auto max-w-6xl scroll-mt-24 px-4 py-12">
+        <h2 className="font-display text-4xl font-bold sm:text-5xl">{copy.home.showcase}</h2>
         <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3">
-          {showcase.map((item) => (
-            <button
+          {showcase.map((item, index) => (
+            <motion.button
               key={`${item.layoutId}-${item.designId}`}
               type="button"
-              className="rounded-[1.5rem] p-3 text-left transition hover:-translate-y-1"
+              className="rounded-[1.5rem] p-3 text-left"
+              initial={reduce ? false : { opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-20px" }}
+              whileHover={reduce ? undefined : { y: -8, rotate: -1.5 }}
+              whileTap={reduce ? undefined : { scale: 0.98 }}
+              transition={{ duration: 0.35, delay: index * 0.05 }}
               onClick={() => {
                 if (!hasAnyPhoto(useSession.getState().photos)) {
                   selectLayout(item.layoutId);
@@ -187,7 +186,7 @@ export function HomePage() {
                 density="thumbnail"
               />
               <span className="mt-3 block text-center font-display text-lg font-semibold">{samples[item.captionKey]}</span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </section>

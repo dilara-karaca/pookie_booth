@@ -1,13 +1,16 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/cn";
+import { isShootComplete, useSession } from "@/store/session";
 
 const hrefs = ["/frames", "/camera", "/editor", "/result"] as const;
 
 export function StepIndicator({ pathname }: { pathname: string }) {
   const { copy } = useI18n();
+  const photos = useSession((state) => state.photos);
   const labels = [copy.steps.frame, copy.steps.camera, copy.steps.edit, copy.steps.save];
   const current = hrefs.findIndex((href) => pathname.startsWith(href));
+  const complete = isShootComplete(photos);
   if (current < 0) return null;
 
   return (
@@ -21,9 +24,10 @@ export function StepIndicator({ pathname }: { pathname: string }) {
           state === "upcoming" && "border-ink/20 bg-white/50 text-ink/50",
         );
         const label = `${index + 1}. ${labels[index]}`;
+        const skipsCamera = href === "/camera" && complete;
         return (
           <li key={href} className="flex items-center gap-2">
-            {state === "upcoming" ? (
+            {state === "upcoming" || skipsCamera ? (
               <span className={className}>{label}</span>
             ) : (
               <Link to={href} className={className} aria-current={state === "current" ? "step" : undefined}>

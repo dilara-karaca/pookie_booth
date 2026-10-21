@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { buttonClass } from "@/components/common/Button";
@@ -23,6 +24,7 @@ export function EditorPage() {
   const setFilter = useSession((state) => state.setFilter);
   const setCustomText = useSession((state) => state.setCustomText);
   const beginRetake = useSession((state) => state.beginRetake);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const state = useSession.getState();
@@ -52,23 +54,34 @@ export function EditorPage() {
       </div>
 
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <StripFit layoutId={layoutId} maxVh={78} maxWidth={460}>
-          <Photostrip
-            layoutId={layoutId}
-            designId={designId}
-            photos={urls}
-            filterId={filterId}
-            caption={customText}
-            dateLabel={stamp.label}
-            interactive
-            onRetake={(index) => {
-              beginRetake(index);
-              navigate("/camera");
-            }}
-          />
-        </StripFit>
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 16, rotate: -1 }}
+          animate={{ opacity: 1, y: 0, rotate: 0 }}
+          transition={{ type: "spring", bounce: 0.28, duration: 0.55 }}
+        >
+          <StripFit layoutId={layoutId} maxVh={78} maxWidth={460}>
+            <Photostrip
+              layoutId={layoutId}
+              designId={designId}
+              photos={urls}
+              filterId={filterId}
+              caption={customText}
+              dateLabel={stamp.label}
+              interactive
+              onRetake={(index) => {
+                beginRetake(index);
+                navigate("/camera");
+              }}
+            />
+          </StripFit>
+        </motion.div>
 
-        <aside className="space-y-8 rounded-[2rem] border-2 border-ink bg-white/85 p-5 shadow-[6px_6px_0_#FFE66D]">
+        <motion.aside
+          className="space-y-8 rounded-[2rem] border-2 border-ink bg-white/85 p-5 shadow-[6px_6px_0_#FFE66D]"
+          initial={reduce ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: reduce ? 0 : 0.08 }}
+        >
           <FilterPicker value={filterId} previewUrl={urls[0]} onChange={setFilter} />
           <CaptionField value={customText} onChange={setCustomText} />
           <p className="rounded-2xl bg-cream px-4 py-3 text-sm">
@@ -78,7 +91,7 @@ export function EditorPage() {
             {copy.editor.finish}
           </button>
           <p className="text-sm text-ink/70">{copy.privacy}</p>
-        </aside>
+        </motion.aside>
       </div>
     </div>
   );

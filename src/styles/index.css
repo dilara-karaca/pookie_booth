@@ -72,6 +72,26 @@ h4,
   animation: floaty 5.5s ease-in-out infinite;
 }
 
+.sway {
+  animation: sway 7s ease-in-out infinite;
+}
+
+.sway-late {
+  animation-delay: -2.2s;
+}
+
+.sway-later {
+  animation-delay: -4.4s;
+}
+
+.wiggle {
+  animation: wiggle 3.4s ease-in-out infinite;
+}
+
+.shutter-pulse {
+  animation: shutter-pulse 1.6s ease-in-out infinite;
+}
+
 .flash-overlay {
   animation: flash 280ms ease-out forwards;
 }
@@ -92,6 +112,36 @@ h4,
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -14px;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    rotate: -2.5deg;
+  }
+  50% {
+    rotate: 2.5deg;
+  }
+}
+
+@keyframes shutter-pulse {
+  0%,
+  100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.06;
   }
 }
 
@@ -143,6 +193,9 @@ h4,
   }
 
   .floaty,
+  .sway,
+  .wiggle,
+  .shutter-pulse,
   .flash-overlay,
   .selected-pop {
     animation: none;

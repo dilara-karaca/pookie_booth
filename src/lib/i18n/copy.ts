@@ -12,10 +12,7 @@ export interface Copy {
     primary: string;
     mobile: string;
     home: string;
-    frames: string;
     how: string;
-    start: string;
-    startHeart: string;
     openMenu: string;
     closeMenu: string;
     skip: string;
@@ -27,14 +24,10 @@ export interface Copy {
     accent: string;
     tagline: string;
     start: string;
-    continueShoot: string;
-    seeStrip: string;
-    seeFrames: string;
     howLead: string;
     howAccent: string;
     steps: Array<{ title: string; copy: string }>;
     showcase: string;
-    browse: string;
     samples: {
       besties: string;
       night: string;
@@ -213,10 +206,7 @@ const en: Copy = {
     primary: "Primary",
     mobile: "Mobile",
     home: "Home",
-    frames: "Frames",
     how: "How It Works",
-    start: "Start Photobooth",
-    startHeart: "Start Photobooth ♡",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     skip: "Skip to content",
@@ -228,9 +218,6 @@ const en: Copy = {
     accent: "Pose!",
     tagline: "Pick your frame, capture your moments, and make cute memories!",
     start: "START PHOTOBOOTH ♡",
-    continueShoot: "Continue shooting",
-    seeStrip: "See your strip",
-    seeFrames: "See the frames",
     howLead: "How it",
     howAccent: "works",
     steps: [
@@ -248,7 +235,6 @@ const en: Copy = {
       },
     ],
     showcase: "Frame showcase",
-    browse: "Browse all frames",
     samples: {
       besties: "Besties",
       night: "Night",
@@ -387,10 +373,7 @@ const tr: Copy = {
     primary: "Ana menü",
     mobile: "Mobil menü",
     home: "Ana sayfa",
-    frames: "Çerçeveler",
     how: "Nasıl çalışır",
-    start: "Photobooth'u başlat",
-    startHeart: "Photobooth'u başlat ♡",
     openMenu: "Menüyü aç",
     closeMenu: "Menüyü kapat",
     skip: "İçeriğe geç",
@@ -398,13 +381,10 @@ const tr: Copy = {
   steps: { group: "Photobooth adımları", frame: "Çerçeve", camera: "Kamera", edit: "Düzenle", save: "Kaydet" },
   home: {
     badges: ["Üyelik yok", "Hep ücretsiz", "Cihazında kalır"],
-    lead: "Hadi",
-    accent: "Poz ver!",
+    lead: "Strike a",
+    accent: "Pose!",
     tagline: "Çerçeveni seç, anını yakala ve tatlı bir hatıra bırak!",
     start: "PHOTOBOOTH'U BAŞLAT ♡",
-    continueShoot: "Çekime devam et",
-    seeStrip: "Şeridini gör",
-    seeFrames: "Çerçevelere bak",
     howLead: "Nasıl",
     howAccent: "çalışır",
     steps: [
@@ -422,7 +402,6 @@ const tr: Copy = {
       },
     ],
     showcase: "Çerçeve vitrini",
-    browse: "Tüm çerçeveler",
     samples: {
       besties: "Kankalar",
       night: "Gece",

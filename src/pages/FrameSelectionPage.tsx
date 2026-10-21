@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router-dom";
 import { buttonClass } from "@/components/common/Button";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
@@ -25,6 +26,7 @@ export function FrameSelectionPage() {
   const selectDesign = useSession((state) => state.selectDesign);
   const [pendingLayout, setPendingLayout] = useState<FrameLayout | null>(null);
   const [category, setCategory] = useState<FrameCategory>("lovely");
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     if (!useSession.getState().layoutId) selectLayout("vertical-4");
@@ -65,10 +67,10 @@ export function FrameSelectionPage() {
           {copy.frames.layout}
         </h2>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {layoutList.map((layout) => {
+          {layoutList.map((layout, index) => {
             const selected = layout.id === layoutId;
             return (
-              <button
+              <motion.button
                 key={layout.id}
                 type="button"
                 aria-pressed={selected}
@@ -77,12 +79,17 @@ export function FrameSelectionPage() {
                   "rounded-[1.5rem] border-2 border-ink p-3 text-left shadow-[4px_4px_0_#40354B]",
                   selected ? "selected-pop bg-butter" : "bg-white",
                 )}
+                initial={reduce ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={reduce ? undefined : { y: -4 }}
+                whileTap={reduce ? undefined : { scale: 0.98 }}
+                transition={{ duration: 0.32, delay: reduce ? 0 : index * 0.05 }}
               >
                 <LayoutGlyph columns={layout.columns} rows={layout.rows} />
                 <span className="mt-3 block font-display text-lg font-bold">{copy.layouts[layout.id].name}</span>
                 <span className="block text-sm">{copy.layouts[layout.id].description}</span>
                 <span className="mt-1 block text-sm font-semibold">{copy.frames.photoCount(layout.photoCount)}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -114,7 +121,13 @@ export function FrameSelectionPage() {
             })}
           </div>
           <p className="mt-2 text-sm text-ink/70">{copy.categories[category].blurb}</p>
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <motion.div
+            key={category}
+            className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"
+            initial={reduce ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
             {designs.map((design) => {
               const selected = design.id === designId;
               return (
@@ -138,25 +151,34 @@ export function FrameSelectionPage() {
                 </button>
               );
             })}
-          </div>
+          </motion.div>
         </section>
 
         <aside className="rounded-[2rem] border-2 border-ink bg-white/80 p-4 shadow-[6px_6px_0_#CDB4DB] lg:sticky lg:top-24">
           <h2 className="font-display text-2xl font-bold">{copy.designs[designId]}</h2>
           <p className="text-sm text-ink/70">{copy.layouts[layoutId].name}</p>
-          <Link to={nextHref} className={buttonClass("primary", "lg", "mt-4 w-full")}>
-            {complete ? copy.frames.backToEditor : copy.frames.shoot}
-          </Link>
-          <StripFit layoutId={layoutId} maxVh={52} maxWidth={260} className="mt-4">
-            <Photostrip
-              layoutId={layoutId}
-              designId={designId}
-              photos={photos.map((photo) => photo?.dataUrl ?? null)}
-              filterId={filterId}
-              caption={customText}
-              dateLabel={previewDate}
-            />
-          </StripFit>
+          <div className="mt-4 hidden lg:block">
+            <Link to={nextHref} className={buttonClass("primary", "lg", "w-full")}>
+              {complete ? copy.frames.backToEditor : copy.frames.shoot}
+            </Link>
+          </div>
+          <motion.div
+            key={`${layoutId}-${designId}`}
+            initial={reduce ? false : { opacity: 0, scale: 0.94, rotate: -1 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ type: "spring", bounce: 0.35, duration: 0.45 }}
+          >
+            <StripFit layoutId={layoutId} maxVh={52} maxWidth={260} className="mt-4">
+              <Photostrip
+                layoutId={layoutId}
+                designId={designId}
+                photos={photos.map((photo) => photo?.dataUrl ?? null)}
+                filterId={filterId}
+                caption={customText}
+                dateLabel={previewDate}
+              />
+            </StripFit>
+          </motion.div>
         </aside>
       </div>
 
