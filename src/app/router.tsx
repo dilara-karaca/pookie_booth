@@ -12,6 +12,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "how", element: <Navigate to={{ pathname: "/", hash: "#how" }} replace /> },
       { path: "frames", element: <FrameSelectionPage /> },
       { path: "camera", element: <CameraPage /> },
       { path: "editor", element: <EditorPage /> },

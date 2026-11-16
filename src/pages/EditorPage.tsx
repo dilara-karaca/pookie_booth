@@ -1,8 +1,9 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCcw } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { buttonClass } from "@/components/common/Button";
+import { Button, buttonClass } from "@/components/common/Button";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { CaptionField } from "@/features/editor/components/CaptionField";
 import { FilterPicker } from "@/features/editor/components/FilterPicker";
 import { Photostrip, StripFit } from "@/features/frames/components/Photostrip";
@@ -24,6 +25,8 @@ export function EditorPage() {
   const setFilter = useSession((state) => state.setFilter);
   const setCustomText = useSession((state) => state.setCustomText);
   const beginRetake = useSession((state) => state.beginRetake);
+  const resetSession = useSession((state) => state.resetSession);
+  const [confirmReset, setConfirmReset] = useState(false);
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -47,10 +50,16 @@ export function EditorPage() {
           <h1 className="font-display text-5xl font-bold">{copy.editor.heading}</h1>
           <p className="mt-2 text-lg">{copy.editor.intro}</p>
         </div>
-        <Link to="/frames" className={buttonClass("ghost", "md")}>
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          {copy.editor.changeFrame}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/frames" className={buttonClass("ghost", "md")}>
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            {copy.editor.changeFrame}
+          </Link>
+          <Button variant="sunny" onClick={() => setConfirmReset(true)}>
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            {copy.result.startOver}
+          </Button>
+        </div>
       </div>
 
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -93,6 +102,19 @@ export function EditorPage() {
           <p className="text-sm text-ink/70">{copy.privacy}</p>
         </motion.aside>
       </div>
+      <ConfirmDialog
+        open={confirmReset}
+        title={copy.result.startTitle}
+        body={copy.result.startBody}
+        confirmLabel={copy.result.startConfirm}
+        cancelLabel={copy.result.keep}
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          resetSession();
+          setConfirmReset(false);
+          navigate("/frames");
+        }}
+      />
     </div>
   );
 }

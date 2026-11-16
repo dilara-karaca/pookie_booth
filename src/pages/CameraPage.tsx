@@ -13,6 +13,8 @@ import { cn } from "@/lib/cn";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSession } from "@/store/session";
 
+const timerOptions = [0, 3, 5, 10] as const;
+
 export function CameraPage() {
   const { copy } = useI18n();
   usePageTitle(copy.pages.camera);
@@ -33,10 +35,14 @@ export function CameraPage() {
   const [flash, setFlash] = useState(false);
   const [busy, setBusy] = useState(false);
   const [holding, setHolding] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState<(typeof timerOptions)[number]>(0);
+  const [remaining, setRemaining] = useState<number | null>(null);
   const [captureCode, setCaptureCode] = useState<"not-ready" | "no-canvas" | "failed" | null>(null);
   const reduce = useReducedMotion();
   const busyRef = useRef(false);
   const timerRef = useRef<number | null>(null);
+  const countdownRef = useRef<number | null>(null);
+  const countingRef = useRef(false);
   const { videoRef, status, error, canFlip } = useCamera(armed, facing, retryToken);
 
   const shoot = useCallback(() => {
@@ -68,21 +74,71 @@ export function CameraPage() {
     }
   }, [commitCapture, facing, layoutId, navigate, photos, retakeIndex, status, videoRef]);
 
+  const shootRef = useRef(shoot);
+  shootRef.current = shoot;
+
+  const stopCountdown = useCallback(() => {
+    if (countdownRef.current !== null) {
+      window.clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    countingRef.current = false;
+    setRemaining(null);
+  }, []);
+
+  const beginShot = useCallback(() => {
+    if (busyRef.current || status !== "ready" || !layoutId) return;
+    const index = retakeIndex ?? photos.findIndex((photo) => photo === null);
+    if (index < 0) return;
+    if (countingRef.current) {
+      stopCountdown();
+      return;
+    }
+    if (timerSeconds === 0) {
+      shoot();
+      return;
+    }
+
+    countingRef.current = true;
+    setRemaining(timerSeconds);
+    const endsAt = Date.now() + timerSeconds * 1000;
+    countdownRef.current = window.setInterval(() => {
+      const left = Math.ceil((endsAt - Date.now()) / 1000);
+      if (left > 0) {
+        setRemaining((current) => (current === left ? current : left));
+        return;
+      }
+      if (countdownRef.current !== null) {
+        window.clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      countingRef.current = false;
+      setRemaining(null);
+      shootRef.current();
+    }, 100);
+  }, [layoutId, photos, retakeIndex, shoot, status, stopCountdown, timerSeconds]);
+
+  useEffect(() => {
+    if (status === "ready") return;
+    stopCountdown();
+  }, [status, stopCountdown]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.code !== "Space" || event.repeat) return;
       const target = event.target;
       if (target instanceof HTMLElement && ["INPUT", "TEXTAREA", "BUTTON", "A"].includes(target.tagName)) return;
       event.preventDefault();
-      shoot();
+      beginShot();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [shoot]);
+  }, [beginShot]);
 
   useEffect(() => {
     return () => {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      if (countdownRef.current !== null) window.clearInterval(countdownRef.current);
     };
   }, []);
 
@@ -157,6 +213,19 @@ export function CameraPage() {
                   className={cn("h-full w-full object-cover", facing === "user" && "-scale-x-100")}
                 />
                 {flash ? <div className="flash-overlay pointer-events-none absolute inset-0 bg-white" /> : null}
+                {remaining !== null ? (
+                  <div className="pointer-events-none absolute inset-0 grid place-items-center bg-ink/35">
+                    <span
+                      aria-hidden="true"
+                      className="grid h-28 w-28 place-items-center rounded-full border-4 border-cream bg-ink/75 font-display text-6xl font-bold text-cream"
+                    >
+                      {remaining}
+                    </span>
+                  </div>
+                ) : null}
+                <p className="sr-only" aria-live="assertive">
+                  {remaining === null ? "" : copy.camera.countdown(remaining)}
+                </p>
                 {status !== "ready" ? (
                   <div className="absolute inset-0 grid place-items-center bg-ink/75 p-6 text-center text-cream">
                     <div>
@@ -179,12 +248,44 @@ export function CameraPage() {
               </p>
             ) : null}
 
-            <div className="mt-4 flex items-center justify-center gap-4">
+            <div className="mt-4 flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-2">
+                <p id="camera-timer" className="font-display text-sm font-semibold">
+                  {copy.camera.timer}
+                </p>
+                <div role="group" aria-labelledby="camera-timer" className="flex flex-wrap justify-center gap-2">
+                  {timerOptions.map((seconds) => {
+                    const selected = timerSeconds === seconds;
+                    return (
+                      <button
+                        key={seconds}
+                        type="button"
+                        aria-pressed={selected}
+                        disabled={busy}
+                        className={cn(
+                          "min-h-11 rounded-full border-2 border-ink px-4 font-display font-semibold",
+                          selected ? "bg-butter shadow-[3px_3px_0_#40354B]" : "bg-white",
+                        )}
+                        onClick={() => {
+                          stopCountdown();
+                          setTimerSeconds(seconds);
+                        }}
+                      >
+                        {seconds === 0 ? copy.camera.timerOff : copy.camera.timerSeconds(seconds)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            <div className="flex items-center justify-center gap-4">
               {canFlip ? (
                 <Button
                   variant="ghost"
                   aria-label={facing === "user" ? copy.camera.flipBack : copy.camera.flipFront}
-                  onClick={() => setFacing((current) => (current === "user" ? "environment" : "user"))}
+                  onClick={() => {
+                    stopCountdown();
+                    setFacing((current) => (current === "user" ? "environment" : "user"));
+                  }}
                 >
                   <SwitchCamera className="h-5 w-5" aria-hidden="true" />
                   {copy.camera.flip}
@@ -196,15 +297,22 @@ export function CameraPage() {
                 type="button"
                 className={cn(
                   "grid h-20 w-20 place-items-center rounded-full border-4 border-ink bg-coral shadow-[4px_4px_0_#40354B] active:scale-95 disabled:opacity-50",
-                  status === "ready" && !busy && "shutter-pulse",
+                  status === "ready" && !busy && remaining === null && "shutter-pulse",
                 )}
-                aria-label={retakeIndex !== null ? copy.camera.retake(displayIndex) : copy.camera.take(displayIndex)}
+                aria-label={
+                  remaining !== null
+                    ? copy.camera.cancelTimer
+                    : retakeIndex !== null
+                      ? copy.camera.retake(displayIndex)
+                      : copy.camera.take(displayIndex)
+                }
                 disabled={status !== "ready" || busy}
-                onClick={shoot}
+                onClick={beginShot}
               >
                 <span className="h-12 w-12 rounded-full border-4 border-white bg-cream" />
               </button>
               <p className="hidden w-24 text-sm text-ink/70 sm:block">{copy.camera.space}</p>
+            </div>
             </div>
           </div>
 

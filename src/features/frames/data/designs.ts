@@ -5,7 +5,7 @@ export const categories: Array<{ id: FrameCategory; label: string; blurb: string
   { id: "lovely", label: "Lovely", blurb: "Hearts, bows, and love notes" },
   { id: "sweet", label: "Sweet", blurb: "Fruit, flowers, and clouds" },
   { id: "gingham", label: "Gingham", blurb: "Checks, stripes, and cloth" },
-  { id: "retro", label: "Retro", blurb: "Y2K stars and groovy shapes" },
+  { id: "retro", label: "Retro", blurb: "Disco balls, 70s daisies, and chrome" },
   { id: "special", label: "Special", blurb: "Little celebration themes" },
 ];
 
@@ -38,11 +38,12 @@ export const frameDesigns: FrameDesign[] = [
   design("gingham-stripes", "Pastel Stripes", "gingham", "#FFF9F0", "#FF8FAB", ["#FFC2D1", "#CDB4DB", "#A2D2FF", "#FFE66D"], "stripes", "#40354B"),
   design("gingham-retro", "Retro Checkers", "gingham", "#FFF9F0", "#40354B", ["#FF8FAB", "#FFE66D"], "checkers", "#40354B"),
 
-  design("retro-stars", "Retro Stars", "retro", "#2A2150", "#FFE66D", ["#FFE66D", "#FF8FAB", "#A2D2FF"], "stars", "#FFF9F0"),
-  design("retro-disco", "Disco", "retro", "#1C1230", "#FF8FAB", ["#FF8FAB", "#FFE66D", "#7DFFD2", "#A2D2FF"], "disco", "#FFF9F0"),
-  design("retro-groovy", "Groovy Flowers", "retro", "#FFF1E4", "#FF8A5B", ["#FF8A5B", "#FFE66D", "#CDB4DB", "#7DCFAB"], "groovy", "#5A2E22"),
-  design("retro-shapes", "Colorful Shapes", "retro", "#FFF9F0", "#40354B", ["#FF8FAB", "#A2D2FF", "#FFE66D", "#CDB4DB"], "shapes", "#40354B"),
-  design("retro-y2k-hearts", "Y2K Hearts", "retro", "#FFD6E8", "#FF4F8B", ["#FF4F8B", "#7AF0FF", "#FFE66D"], "y2k-hearts", "#402038"),
+  design("retro-stars", "Superstar", "retro", "#3A1630", "#F6C445", ["#F6C445", "#FF6B4A", "#FFF4D8"], "stars", "#FFF6E4"),
+  design("retro-night-stars", "White Stars", "retro", "#111111", "#FFFFFF", ["#FFFFFF"], "night-stars", "#FFFFFF"),
+  design("retro-disco", "Disco Ball", "retro", "#120E16", "#F4D35E", ["#FF4F8B", "#F6C445", "#5CE1E6", "#F2F2F4"], "disco", "#FFF9F0"),
+  design("retro-groovy", "70s Daisies", "retro", "#F6C98A", "#E25B2A", ["#E25B2A", "#F0B429", "#6B3A22", "#7FA36A"], "groovy", "#4A2418"),
+  design("retro-shapes", "Sunset", "retro", "#1A1028", "#F79A2E", ["#7A2E86", "#E23B6A", "#F2542A", "#F79A2E"], "shapes", "#FFF6E4"),
+  design("retro-y2k-hearts", "Chrome", "retro", "#D9D4E4", "#F7F8FC", ["#C9B6E6", "#8ED4E6", "#E7C6E4"], "y2k-hearts", "#2C2440"),
 
   design("special-birthday", "Birthday", "special", "#FFF6E8", "#FF8FAB", ["#FF8FAB", "#A2D2FF", "#FFE66D", "#CDB4DB"], "birthday", "#5A3A22"),
   design("special-valentine", "Valentine's Day", "special", "#FFE5EC", "#E23D4A", ["#E23D4A", "#FF8FAB"], "valentine", "#7A2430"),

@@ -102,8 +102,26 @@ export async function drawStrip(
     ctx.globalAlpha = 1;
   }
 
+  const well = photoWell(design.patternId, design.backgroundColor);
+
   metrics.slots.forEach((slot, index) => {
     const image = images[index];
+    if (well) {
+      ctx.save();
+      const inset = 5 * scale;
+      roundRect(
+        ctx,
+        slot.x - inset,
+        slot.y - inset,
+        slot.width + inset * 2,
+        slot.height + inset * 2,
+        metrics.photoRadius + inset,
+      );
+      ctx.fillStyle = well.fill;
+      ctx.fill();
+      ctx.restore();
+    }
+
     ctx.save();
     roundRect(ctx, slot.x, slot.y, slot.width, slot.height, metrics.photoRadius);
     ctx.clip();
@@ -113,6 +131,16 @@ export async function drawStrip(
       if (filter.id !== "original" && canvasFiltersWork(ctx)) ctx.filter = filter.css;
       drawCover(ctx, source, slot.x, slot.y, slot.width, slot.height);
       ctx.filter = "none";
+    } else if (well) {
+      ctx.fillStyle = well.fill;
+      ctx.fillRect(slot.x, slot.y, slot.width, slot.height);
+      ctx.fillStyle = well.number;
+      ctx.globalAlpha = 0.7;
+      ctx.font = `700 ${Math.max(18, slot.height * 0.16)}px Fredoka, Nunito, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(index + 1), slot.x + slot.width / 2, slot.y + slot.height / 2);
+      ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = dark ? "rgba(255,255,255,0.12)" : "rgba(64,53,75,0.08)";
       ctx.fillRect(slot.x, slot.y, slot.width, slot.height);
@@ -128,8 +156,8 @@ export async function drawStrip(
 
     ctx.save();
     roundRect(ctx, slot.x, slot.y, slot.width, slot.height, metrics.photoRadius);
-    ctx.strokeStyle = dark ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.8)";
-    ctx.lineWidth = Math.max(1, 3 * scale);
+    ctx.strokeStyle = well ? well.stroke : dark ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.8)";
+    ctx.lineWidth = well ? Math.max(2, 7 * scale) : Math.max(1, 3 * scale);
     ctx.stroke();
     ctx.restore();
   });
@@ -143,6 +171,16 @@ export async function drawStrip(
   ctx.lineWidth = Math.max(2, 3 * scale);
   ctx.stroke();
   ctx.restore();
+}
+
+function photoWell(
+  patternId: string,
+  background: string,
+): { fill: string; stroke: string; number: string } | null {
+  if (patternId === "disco") return { fill: background, stroke: "#FFF4D2", number: "#FFF4D2" };
+  if (patternId === "shapes") return { fill: "#1A1028", stroke: "#FFF6E4", number: "#FFF6E4" };
+  if (patternId === "y2k-hearts") return { fill: "#F7F8FC", stroke: "#4E4668", number: "#4E4668" };
+  return null;
 }
 
 let filterSupport: boolean | null = null;

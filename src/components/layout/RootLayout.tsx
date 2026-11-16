@@ -17,6 +17,8 @@ export function RootLayout() {
   const resetSession = useSession((state) => state.resetSession);
   const shooting = hasAnyPhoto(photos);
   const compact = location.pathname === "/camera";
+  const landing = location.pathname === "/";
+  const inFlow = flow.has(location.pathname);
   const { copy } = useI18n();
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
@@ -36,25 +38,23 @@ export function RootLayout() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [shooting]);
 
-  useEffect(() => {
-    if (!location.hash) return;
-    const id = decodeURIComponent(location.hash.slice(1));
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [location.pathname, location.hash]);
-
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={landing ? "flex h-dvh flex-col overflow-hidden" : "flex min-h-screen flex-col"}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-butter focus:px-4 focus:py-2">
         {copy.nav.skip}
       </a>
       <Header />
-      <div className="mx-auto w-full max-w-6xl px-4 pt-4">
-        <StepIndicator pathname={location.pathname} />
-      </div>
-      <main id="main" className="flex-1">
-        <PageTransition pathname={location.pathname}>{outlet}</PageTransition>
+      {inFlow ? (
+        <div className="mx-auto w-full max-w-6xl px-4 pt-4">
+          <StepIndicator pathname={location.pathname} />
+        </div>
+      ) : null}
+      <main id="main" className={landing ? "min-h-0 flex-1" : "flex-1"}>
+        <PageTransition pathname={location.pathname} className={landing ? "h-full" : undefined}>
+          {outlet}
+        </PageTransition>
       </main>
-      {compact ? null : <Footer />}
+      {compact || landing ? null : <Footer />}
       <ConfirmDialog
         open={blocker.state === "blocked"}
         title={copy.leave.title}

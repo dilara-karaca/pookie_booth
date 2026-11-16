@@ -27,6 +27,7 @@ export type PatternId =
   | "stripes"
   | "checkers"
   | "stars"
+  | "night-stars"
   | "disco"
   | "groovy"
   | "shapes"

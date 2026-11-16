@@ -27,16 +27,10 @@ export interface Copy {
     howLead: string;
     howAccent: string;
     steps: Array<{ title: string; copy: string }>;
-    showcase: string;
     samples: {
       besties: string;
       night: string;
       hello: string;
-      nightOut: string;
-      skyDay: string;
-      sweet: string;
-      party: string;
-      y2k: string;
     };
   };
   frames: {
@@ -67,6 +61,11 @@ export interface Copy {
     flip: string;
     flipBack: string;
     flipFront: string;
+    timer: string;
+    timerOff: string;
+    timerSeconds: (seconds: number) => string;
+    countdown: (seconds: number) => string;
+    cancelTimer: string;
     space: string;
     take: (index: number) => string;
     retake: (index: number) => string;
@@ -119,8 +118,8 @@ export interface Copy {
   leave: { title: string; body: string; confirm: string; keep: string };
   privacy: string;
   strip: (count: number, date: string, caption: string) => string;
-  pages: { frames: string; camera: string; editor: string; result: string };
-  layouts: Record<FrameLayout, { name: string; description: string }>;
+  pages: { how: string; frames: string; camera: string; editor: string; result: string };
+  layouts: Record<FrameLayout, { name: string }>;
   categories: Record<FrameCategory, { label: string; blurb: string }>;
   filters: Record<FilterId, string>;
   designs: Record<string, string>;
@@ -151,11 +150,12 @@ const designsEn: Record<string, string> = {
   "gingham-yellow": "Yellow Checkered",
   "gingham-stripes": "Pastel Stripes",
   "gingham-retro": "Retro Checkers",
-  "retro-stars": "Retro Stars",
-  "retro-disco": "Disco",
-  "retro-groovy": "Groovy Flowers",
-  "retro-shapes": "Colorful Shapes",
-  "retro-y2k-hearts": "Y2K Hearts",
+  "retro-stars": "Superstar",
+  "retro-night-stars": "White Stars",
+  "retro-disco": "Disco Ball",
+  "retro-groovy": "70s Daisies",
+  "retro-shapes": "Sunset",
+  "retro-y2k-hearts": "Chrome",
   "special-birthday": "Birthday",
   "special-valentine": "Valentine's Day",
   "special-christmas": "Christmas",
@@ -187,11 +187,12 @@ const designsTr: Record<string, string> = {
   "gingham-yellow": "Sarı Kareli",
   "gingham-stripes": "Pastel Çizgiler",
   "gingham-retro": "Retro Kareler",
-  "retro-stars": "Retro Yıldızlar",
-  "retro-disco": "Disko",
-  "retro-groovy": "Renkli Çiçekler",
-  "retro-shapes": "Renkli Şekiller",
-  "retro-y2k-hearts": "Y2K Kalpler",
+  "retro-stars": "Süper Yıldız",
+  "retro-night-stars": "Beyaz Yıldızlar",
+  "retro-disco": "Disko Topu",
+  "retro-groovy": "70'ler Papatya",
+  "retro-shapes": "Gün Batımı",
+  "retro-y2k-hearts": "Krom",
   "special-birthday": "Doğum Günü",
   "special-valentine": "Sevgililer Günü",
   "special-christmas": "Noel",
@@ -234,16 +235,10 @@ const en: Copy = {
         copy: "Add a filter and a caption, then save a crisp PNG. It never leaves your device.",
       },
     ],
-    showcase: "Frame showcase",
     samples: {
       besties: "Besties",
       night: "Night",
       hello: "Hello",
-      nightOut: "Night Out",
-      skyDay: "Sky Day",
-      sweet: "Sweet",
-      party: "Party",
-      y2k: "Y2K",
     },
   },
   frames: {
@@ -275,6 +270,11 @@ const en: Copy = {
     flip: "Flip",
     flipBack: "Switch to back camera",
     flipFront: "Switch to front camera",
+    timer: "Timer",
+    timerOff: "Off",
+    timerSeconds: (seconds) => `${seconds} sec`,
+    countdown: (seconds) => `Photo in ${seconds}`,
+    cancelTimer: "Cancel timer",
     space: "Space to shoot",
     take: (index) => `Take photo ${index}`,
     retake: (index) => `Retake photo ${index}`,
@@ -338,20 +338,20 @@ const en: Copy = {
   },
   privacy: "Photos stay on your device. Nothing is uploaded, stored, or shared through a server.",
   strip: (count, date, caption) => `${caption ? `${caption}. ` : ""}Photo strip with ${count} photos. ${date}`,
-  pages: { frames: "Frames", camera: "Camera", editor: "Edit", result: "Your strip" },
+  pages: { how: "How it works", frames: "Frames", camera: "Camera", editor: "Edit", result: "Your strip" },
   layouts: {
-    "vertical-2": { name: "Vertical 2", description: "Two photos, stacked" },
-    "vertical-3": { name: "Vertical 3", description: "Three photos, stacked" },
-    "vertical-4": { name: "Vertical 4", description: "The classic four-cut" },
-    "grid-4": { name: "Grid 4", description: "A 2×2 collage" },
-    "grid-6": { name: "Grid 6", description: "A 2×3 collage" },
+    "vertical-2": { name: "Vertical 2" },
+    "vertical-3": { name: "Vertical 3" },
+    "vertical-4": { name: "Vertical 4" },
+    "grid-4": { name: "Grid 4" },
+    "grid-6": { name: "Grid 6" },
   },
   categories: {
     classic: { label: "Classic", blurb: "Clean color borders" },
     lovely: { label: "Lovely", blurb: "Hearts, bows, and love notes" },
     sweet: { label: "Sweet", blurb: "Fruit, flowers, and clouds" },
     gingham: { label: "Gingham", blurb: "Checks, stripes, and cloth" },
-    retro: { label: "Retro", blurb: "Y2K stars and groovy shapes" },
+    retro: { label: "Retro", blurb: "Disco balls, 70s daisies, and chrome" },
     special: { label: "Special", blurb: "Little celebration themes" },
   },
   filters: {
@@ -401,16 +401,10 @@ const tr: Copy = {
         copy: "Filtre ve kısa bir yazı ekle, sonra net bir PNG kaydet. Cihazından çıkmaz.",
       },
     ],
-    showcase: "Çerçeve vitrini",
     samples: {
       besties: "Kankalar",
       night: "Gece",
       hello: "Selam",
-      nightOut: "Gece çıkışı",
-      skyDay: "Gökyüzü",
-      sweet: "Tatlı",
-      party: "Parti",
-      y2k: "Y2K",
     },
   },
   frames: {
@@ -442,6 +436,11 @@ const tr: Copy = {
     flip: "Çevir",
     flipBack: "Arka kameraya geç",
     flipFront: "Ön kameraya geç",
+    timer: "Zamanlayıcı",
+    timerOff: "Kapalı",
+    timerSeconds: (seconds) => `${seconds} sn`,
+    countdown: (seconds) => `${seconds} saniye kaldı`,
+    cancelTimer: "Zamanlayıcıyı iptal et",
     space: "Çekmek için boşluk",
     take: (index) => `${index}. fotoğrafı çek`,
     retake: (index) => `${index}. fotoğrafı yeniden çek`,
@@ -506,20 +505,20 @@ const tr: Copy = {
   privacy: "Fotoğraflar cihazında kalır. Hiçbir şey yüklenmez, saklanmaz veya bir sunucu üzerinden paylaşılmaz.",
   strip: (count, date, caption) =>
     `${caption ? `${caption}. ` : ""}${count} fotoğraflık şerit. ${date}`,
-  pages: { frames: "Çerçeveler", camera: "Kamera", editor: "Düzenle", result: "Şeridin" },
+  pages: { how: "Nasıl çalışır", frames: "Çerçeveler", camera: "Kamera", editor: "Düzenle", result: "Şeridin" },
   layouts: {
-    "vertical-2": { name: "Dikey 2", description: "Alt alta iki fotoğraf" },
-    "vertical-3": { name: "Dikey 3", description: "Alt alta üç fotoğraf" },
-    "vertical-4": { name: "Dikey 4", description: "Klasik dört kare" },
-    "grid-4": { name: "Izgara 4", description: "2×2 kolaj" },
-    "grid-6": { name: "Izgara 6", description: "2×3 kolaj" },
+    "vertical-2": { name: "Dikey 2" },
+    "vertical-3": { name: "Dikey 3" },
+    "vertical-4": { name: "Dikey 4" },
+    "grid-4": { name: "Izgara 4" },
+    "grid-6": { name: "Izgara 6" },
   },
   categories: {
     classic: { label: "Klasik", blurb: "Düz renkli kenarlar" },
     lovely: { label: "Sevimli", blurb: "Kalpler, fiyonklar ve aşk notları" },
     sweet: { label: "Tatlı", blurb: "Meyve, çiçek ve bulutlar" },
     gingham: { label: "Ekose", blurb: "Kareler, çizgiler ve kumaş" },
-    retro: { label: "Retro", blurb: "Y2K yıldızlar ve rengarenk şekiller" },
+    retro: { label: "Retro", blurb: "Disko topu, 70'ler papatya ve krom" },
     special: { label: "Özel", blurb: "Küçük kutlama temaları" },
   },
   filters: {

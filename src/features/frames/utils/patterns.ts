@@ -14,6 +14,7 @@ export const PATTERN_IDS: PatternId[] = [
   "stripes",
   "checkers",
   "stars",
+  "night-stars",
   "disco",
   "groovy",
   "shapes",
@@ -153,74 +154,115 @@ const patternPainters: Record<Exclude<PatternId, "solid">, Painter> = {
     ctx.restore();
   },
   stars: (ctx, width, height, scale, colors) => {
-    tile(width, height, 56 * scale, 52 * scale, (x, y, column, row) => {
-      ctx.fillStyle = colors[(column + row) % colors.length] ?? colors[0];
-      traceStar(ctx, x, y, (column + row) % 2 === 0 ? 9 * scale : 5 * scale);
+    tile(width, height, 128 * scale, 116 * scale, (x, y, column, row) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(((column * 2 + row) % 5) * 0.22);
+      if ((column + row) % 2 === 0) {
+        const fill = colors[(column + row) % Math.max(1, colors.length - 1)] ?? colors[0];
+        ctx.fillStyle = "rgba(20, 8, 16, 0.4)";
+        traceStar(ctx, 3 * scale, 4 * scale, 30 * scale);
+        ctx.fill();
+        ctx.fillStyle = fill;
+        traceStar(ctx, 0, 0, 30 * scale);
+        ctx.fill();
+        ctx.lineWidth = 3.4 * scale;
+        ctx.strokeStyle = "#FFF6E4";
+        ctx.stroke();
+        ctx.fillStyle = "#FFF6E4";
+        traceStar(ctx, 0, 0, 11 * scale);
+        ctx.fill();
+      } else {
+        drawMarqueeBulb(ctx, 0, 0, 11 * scale, colors[0] ?? "#F6C445");
+      }
+      ctx.restore();
+    });
+  },
+  "night-stars": (ctx, width, height, scale, colors) => {
+    const fill = colors[0] ?? "#FFFFFF";
+    tile(width, height, 78 * scale, 70 * scale, (x, y, column, row) => {
+      const n = (column * 13 + row * 7) % 11;
+      if (n > 8) return;
+      const radius = n === 0 ? 32 : n < 3 ? 18 : n < 6 ? 10 : 6;
+      const jx = ((column * 19 + row * 3) % 17 - 8) * 1.4 * scale;
+      const jy = ((column * 5 + row * 23) % 17 - 8) * 1.4 * scale;
+      ctx.save();
+      ctx.translate(x + jx, y + jy);
+      ctx.rotate((n % 5) * 0.28);
+      ctx.fillStyle = fill;
+      traceStar(ctx, 0, 0, radius * scale, n % 4 === 0 ? 4 : 5);
       ctx.fill();
+      ctx.restore();
     });
   },
   disco: (ctx, width, height, scale, colors) => {
-    tile(width, height, 48 * scale, 48 * scale, (x, y, column, row) => {
-      ctx.fillStyle = colors[(column + row) % colors.length] ?? colors[0];
-      ctx.globalAlpha = 0.9;
-      ctx.beginPath();
-      ctx.arc(x, y, (column + row) % 3 === 0 ? 8 * scale : 4 * scale, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#FFFFFF";
-      ctx.beginPath();
-      ctx.arc(x - 2 * scale, y - 2 * scale, 1.4 * scale, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    const size = 46 * scale;
+    for (let row = 0, y = -size; y < height + size; y += size * 0.78, row += 1) {
+      const offset = row % 2 === 0 ? 0 : size * 0.5;
+      for (let column = 0, x = -size + offset; x < width + size; x += size, column += 1) {
+        const color = colors[(column + row) % colors.length] ?? colors[0];
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = color;
+        ctx.fillRect(-size * 0.36, -size * 0.36, size * 0.72, size * 0.72);
+        ctx.strokeStyle = "rgba(8, 6, 12, 0.85)";
+        ctx.lineWidth = 2.4 * scale;
+        ctx.strokeRect(-size * 0.36, -size * 0.36, size * 0.72, size * 0.72);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.beginPath();
+        ctx.moveTo(-size * 0.36, -size * 0.36);
+        ctx.lineTo(size * 0.04, -size * 0.36);
+        ctx.lineTo(-size * 0.36, size * 0.04);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
   },
   groovy: (ctx, width, height, scale, colors) => {
-    tile(width, height, 64 * scale, 60 * scale, (x, y, column, row) => {
-      drawFlower(
-        ctx,
-        x,
-        y,
-        13 * scale,
-        colors[(column + row) % colors.length] ?? colors[0],
-        colors[(column + 1) % colors.length] ?? "#FFE66D",
-      );
+    paintWaves(ctx, width, height, scale, colors);
+    tile(width, height, 168 * scale, 150 * scale, (x, y, column, row) => {
+      const shift = row % 2 === 0 ? 0 : 36 * scale;
+      const center = (column + row) % 2 === 0 ? (colors[2] ?? "#6B3A22") : (colors[0] ?? "#E25B2A");
+      drawSeventiesDaisy(ctx, x + shift, y, 40 * scale, "#FFF3D4", center);
     });
   },
   shapes: (ctx, width, height, scale, colors) => {
-    tile(width, height, 50 * scale, 50 * scale, (x, y, column, row) => {
-      ctx.fillStyle = colors[(column + row) % colors.length] ?? colors[0];
-      const kind = (column + row * 2) % 4;
-      ctx.beginPath();
-      if (kind === 0) {
-        ctx.arc(x, y, 7 * scale, 0, Math.PI * 2);
-      } else if (kind === 1) {
-        ctx.moveTo(x, y - 8 * scale);
-        ctx.lineTo(x + 7 * scale, y + 6 * scale);
-        ctx.lineTo(x - 7 * scale, y + 6 * scale);
-        ctx.closePath();
-      } else if (kind === 2) {
-        roundRect(ctx, x - 6 * scale, y - 6 * scale, 12 * scale, 12 * scale, 3 * scale);
-      } else {
-        traceStar(ctx, x, y, 7 * scale, 4);
-      }
-      ctx.fill();
-    });
+    const sky = ctx.createLinearGradient(0, 0, 0, height);
+    sky.addColorStop(0, colors[0] ?? "#7A2E86");
+    sky.addColorStop(0.28, colors[1] ?? "#E23B6A");
+    sky.addColorStop(0.52, colors[2] ?? "#F2542A");
+    sky.addColorStop(0.74, colors[3] ?? "#F79A2E");
+    sky.addColorStop(1, "#F8D56A");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "#FFF6D0";
+    ctx.strokeStyle = "#F6B43A";
+    ctx.lineWidth = 8 * scale;
+    ctx.beginPath();
+    ctx.arc(width / 2, 0, width * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   },
   "y2k-hearts": (ctx, width, height, scale, colors) => {
-    tile(width, height, 58 * scale, 52 * scale, (x, y, column, row) => {
-      if ((column + row) % 3 === 0) {
-        ctx.fillStyle = colors[2] ?? colors[0];
-        traceStar(ctx, x, y, 5 * scale, 4);
-        ctx.fill();
-        return;
-      }
-      ctx.fillStyle = colors[(column + row) % 2] ?? colors[0];
-      traceHeart(ctx, x, y, 8 * scale);
-      ctx.fill();
-      ctx.strokeStyle = colors[1] ?? "#fff";
-      ctx.lineWidth = 1.2 * scale;
-      traceHeart(ctx, x, y - 1.5 * scale, 5 * scale);
-      ctx.stroke();
-    });
+    const metal = ctx.createLinearGradient(0, 0, width, height);
+    metal.addColorStop(0, "#F6F4FB");
+    metal.addColorStop(0.3, colors[0] ?? "#C9B6E6");
+    metal.addColorStop(0.5, "#F8FBFF");
+    metal.addColorStop(0.72, colors[1] ?? "#8ED4E6");
+    metal.addColorStop(1, colors[2] ?? "#E7C6E4");
+    ctx.fillStyle = metal;
+    ctx.fillRect(0, 0, width, height);
+    ctx.save();
+    ctx.translate(width / 2, height / 2);
+    ctx.rotate(-0.68);
+    const span = width + height;
+    ctx.fillStyle = "rgba(255,255,255,0.62)";
+    ctx.fillRect(-span, -16 * scale, span * 2, 32 * scale);
+    ctx.fillStyle = "rgba(255,255,255,0.3)";
+    ctx.fillRect(-span, 78 * scale, span * 2, 14 * scale);
+    ctx.restore();
   },
   birthday: (ctx, width, height, scale, colors) => {
     tile(width, height, 46 * scale, 46 * scale, (x, y, column, row) => {
@@ -322,6 +364,86 @@ function traceHeart(ctx: CanvasRenderingContext2D, x: number, y: number, size: n
   ctx.bezierCurveTo(x - size * 1.05, y - size * 0.1, x - size * 0.45, y - size, x, top);
   ctx.bezierCurveTo(x + size * 0.45, y - size, x + size * 1.05, y - size * 0.1, x, y + size * 0.55);
   ctx.closePath();
+}
+
+function drawMarqueeBulb(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, color: string): void {
+  ctx.fillStyle = "rgba(20, 8, 16, 0.35)";
+  ctx.beginPath();
+  ctx.arc(x + radius * 0.2, y + radius * 0.28, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#FFF6E4";
+  ctx.lineWidth = Math.max(1.2, radius * 0.18);
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.beginPath();
+  ctx.arc(x - radius * 0.28, y - radius * 0.28, radius * 0.32, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function paintWaves(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  scale: number,
+  colors: string[],
+): void {
+  const band = 34 * scale;
+  const step = 14 * scale;
+  for (let index = 0, y = -band; y < height + band; y += band, index += 1) {
+    ctx.fillStyle = colors[index % colors.length] ?? colors[0];
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x <= width + step; x += step) {
+      ctx.lineTo(x, y + Math.sin(x / (42 * scale) + index * 0.7) * 10 * scale);
+    }
+    ctx.lineTo(width, y + band + 18 * scale);
+    for (let x = width; x >= -step; x -= step) {
+      ctx.lineTo(x, y + band + Math.sin(x / (42 * scale) + index * 0.7) * 10 * scale);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function drawSeventiesDaisy(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  petal: string,
+  center: string,
+): void {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = petal;
+  const petals = 10;
+  for (let index = 0; index < petals; index += 1) {
+    const angle = (index * Math.PI * 2) / petals;
+    ctx.beginPath();
+    ctx.ellipse(
+      Math.cos(angle) * radius * 0.36,
+      Math.sin(angle) * radius * 0.36,
+      radius * 0.48,
+      radius * 0.18,
+      angle,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.fillStyle = "#F8E7A0";
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.32, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = center;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.16, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function traceStar(

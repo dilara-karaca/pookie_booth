@@ -87,7 +87,6 @@ export function FrameSelectionPage() {
               >
                 <LayoutGlyph columns={layout.columns} rows={layout.rows} />
                 <span className="mt-3 block font-display text-lg font-bold">{copy.layouts[layout.id].name}</span>
-                <span className="block text-sm">{copy.layouts[layout.id].description}</span>
                 <span className="mt-1 block text-sm font-semibold">{copy.frames.photoCount(layout.photoCount)}</span>
               </motion.button>
             );
